@@ -1,0 +1,31 @@
+[project]
+name = "python-autotests-demoqa"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "playwright>=1.48",
+    "pytest>=8.2",
+    "pytest-playwright>=0.5",
+    "pytest-xdist>=3.6",
+    "allure-pytest>=2.13",
+    "httpx>=0.27",
+    "pydantic>=2.7",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.5"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --alluredir=allure-results"
+testpaths = ["src/tests"]
+markers = [
+    "ui: UI-тесты",
+    "api: API-тесты",
+    "smoke: быстрый прогон",
+    "integration: тяжёлые тесты",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
