@@ -1,4 +1,5 @@
 import allure
+import httpx
 import pytest
 from playwright.sync_api import Page, BrowserContext
 
@@ -22,6 +23,13 @@ def page(context: BrowserContext) -> Page:
     p = context.new_page()
     yield p
     p.close()
+
+
+@pytest.fixture()
+def api_client() -> httpx.Client:
+    """HTTP-клиент для API-тестов. Базовый URL — config.BOOKSTORE_URL."""
+    with httpx.Client(base_url=config.BOOKSTORE_URL, timeout=30) as client:
+        yield client
 
 
 @pytest.hookimpl(hookwrapper=True)

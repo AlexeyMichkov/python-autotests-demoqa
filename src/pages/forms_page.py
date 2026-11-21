@@ -17,6 +17,7 @@ class FormsPage(BasePage):
     SUBJECTS_INPUT = "#subjectsInput"
     SUBJECT_OPTION = '[role="option"]'  # устойчиво к номеру react-select
     SUBMIT_BUTTON = "button#submit"
+    ADDRESS_INPUT = "textarea#currentAddress"
     SUCCESS_MODAL = "div.modal-content"
     CLOSE_MODAL_BUTTON = "button#closeLargeModal"
 
@@ -64,6 +65,10 @@ class FormsPage(BasePage):
         self.page.fill(self.DOB_INPUT, dob)
         self.page.keyboard.press("Enter")
 
+    @allure.step("Заполнить адрес: {address}")
+    def fill_address(self, address: str):
+        self.page.fill(self.ADDRESS_INPUT, address)
+
     @allure.step("Нажать Submit")
     def click_submit(self):
         self.page.locator(self.SUBMIT_BUTTON).click()
@@ -71,6 +76,10 @@ class FormsPage(BasePage):
     @allure.step("Проверить появление модального окна успеха")
     def is_success_modal_visible(self) -> bool:
         return self.page.locator(self.SUCCESS_MODAL).is_visible()
+
+    @allure.step("Получить текст модального окна")
+    def get_modal_content(self) -> str:
+        return self.page.locator(self.SUCCESS_MODAL).inner_text()
 
     @allure.step("Закрыть модальное окно")
     def close_modal(self):

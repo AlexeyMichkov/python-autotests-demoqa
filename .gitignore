@@ -17,6 +17,7 @@ venv/
 # IDE
 .idea/
 .vscode/
+*.iml
 *.swp
 *.swo
 
@@ -36,3 +37,6 @@ allure-report/
 # OS
 .DS_Store
 Thumbs.db
+
+# AI agent
+.aiforopenide/

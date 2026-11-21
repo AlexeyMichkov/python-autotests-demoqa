@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]" pytest-rerunfailures
+
+      - name: Install browsers
+        run: playwright install --with-deps chromium
+
+      - name: Write API secrets to .env
+        run: |
+          echo "API_USER=${{ secrets.API_USER }}" >> .env
+          echo "API_PASS=${{ secrets.API_PASS }}" >> .env
+          echo "BASE_URL=https://demoqa.com" >> .env
+          echo "BOOKSTORE_URL=https://bookstore.toolsqa.com" >> .env  
+
+
+      - name: Run UI tests
+        run: pytest src/tests/ui/ -v --alluredir=allure-results
+
+      - name: Run API tests
+        run: pytest src/tests/api/ -v --alluredir=allure-results --reruns 2
+
+      - name: Upload allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+
