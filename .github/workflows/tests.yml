@@ -48,7 +48,7 @@ jobs:
         if: always()
         run: |
           coverage html
-          coverage report --fail-under=80
+          coverage report
 
       - name: Upload allure results
         if: always()

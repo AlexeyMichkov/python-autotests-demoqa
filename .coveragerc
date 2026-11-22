@@ -1,2 +1,8 @@
 [run]
 relative_files = True
+omit =
+    src/tests/*
+    */__init__.py
+
+[report]
+fail_under = 90
