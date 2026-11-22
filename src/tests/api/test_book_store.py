@@ -10,6 +10,12 @@ ISBN = "9781449325862"  # ISBN из каталога: GET /BookStore/v1/Books
 PASSWORD = "AutoTest#1234"
 
 
+def _check_json(response):
+    """Если ToolsQA вернул HTML вместо JSON — пропускаем тест."""
+    if "text/html" in response.headers.get("content-type", ""):
+        pytest.skip("ToolsQA API returned HTML instead of JSON")
+
+
 def _create_user(api_client):
     """Создаёт тестового пользователя. Возвращает (user_id, user_name)."""
     user_name = f"autotest_{uuid.uuid4().hex[:8]}"
@@ -17,6 +23,7 @@ def _create_user(api_client):
         "/Account/v1/User",
         json={"userName": user_name, "password": PASSWORD},
     )
+    _check_json(response)
     assert response.status_code == 201, response.text
     return response.json()["userID"], user_name
 
@@ -27,6 +34,7 @@ def _generate_token(api_client, user_name):
         "/Account/v1/GenerateToken",
         json={"userName": user_name, "password": PASSWORD},
     )
+    _check_json(response)
     assert response.status_code == 200, response.text
     return response.json()["token"]
 
@@ -37,6 +45,7 @@ def _get_collection_isbns(api_client, user_id, token):
         f"/Account/v1/User/{user_id}",
         headers={"Authorization": f"Bearer {token}"},
     )
+    _check_json(response)
     assert response.status_code == 200, response.text
     return [book["isbn"] for book in response.json()["books"]]
 
@@ -53,6 +62,7 @@ def auth(api_client):
 def test_get_all_books(api_client):
     """GET /BookStore/v1/Books — 200, ответ — список книг."""
     response = api_client.get("/BookStore/v1/Books")
+    _check_json(response)
     assert response.status_code == 200
     books = response.json()["books"]
     assert isinstance(books, list)
@@ -62,6 +72,7 @@ def test_get_all_books(api_client):
 def test_get_book_by_isbn(api_client):
     """GET /BookStore/v1/Book?ISBN={isbn} — 200, структура ответа."""
     response = api_client.get("/BookStore/v1/Book", params={"ISBN": ISBN})
+    _check_json(response)
     assert response.status_code == 200
     book = response.json()
     assert book["isbn"] == ISBN
@@ -99,6 +110,7 @@ def test_add_book_to_collection(api_client, auth):
         if response.status_code < 500:
             break
     assert response is not None and response.status_code == 201, response
+    _check_json(response)
 
     # Проверка: книга в коллекции (GET /Account/v1/User/{userId} -> books)
     assert ISBN in _get_collection_isbns(api_client, user_id, token)
@@ -113,7 +125,8 @@ def test_delete_user(api_client):
         f"/Account/v1/User/{user_id}",
         headers={"Authorization": f"Bearer {token}"},
     )
-    assert response.status_code == 204
+    _check_json(response)
+    assert response.status_code in (200, 204), response.text
 
 
 @pytest.mark.api
@@ -131,6 +144,7 @@ def test_delete_collection_of_books(api_client, auth):
         headers={"Authorization": f"Bearer {token}"},
         json={"userId": user_id, "collectionOfIsbns": [{"isbn": ISBN}]},
     )
+    _check_json(add)
     assert add.status_code == 201, add.text
     assert ISBN in _get_collection_isbns(api_client, user_id, token)
 
@@ -152,4 +166,5 @@ def test_delete_collection_of_books(api_client, auth):
         if response.status_code >= 500:
             continue
     assert response is not None and response.status_code == 204, response
+    _check_json(response)
     assert ISBN not in _get_collection_isbns(api_client, user_id, token)

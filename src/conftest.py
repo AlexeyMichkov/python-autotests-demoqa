@@ -1,3 +1,5 @@
+import time
+
 import allure
 import httpx
 import pytest
@@ -30,6 +32,12 @@ def api_client() -> httpx.Client:
     """HTTP-клиент для API-тестов. Базовый URL — config.BOOKSTORE_URL."""
     with httpx.Client(base_url=config.BOOKSTORE_URL, timeout=30) as client:
         yield client
+
+
+@pytest.fixture(autouse=True)
+def delay_between_tests():
+    yield
+    time.sleep(1)
 
 
 @pytest.hookimpl(hookwrapper=True)

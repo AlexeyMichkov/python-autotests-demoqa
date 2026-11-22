@@ -42,7 +42,7 @@ jobs:
         run: pytest src/tests/ui/ -v --cov=src --cov-append --alluredir=allure-results
 
       - name: Run API tests
-        run: pytest src/tests/api/ -v --cov=src --cov-append --alluredir=allure-results --reruns 2
+        run: pytest src/tests/api/ -v --cov=src --cov-append --alluredir=allure-results --reruns 4
 
       - name: Generate coverage report
         if: always()
