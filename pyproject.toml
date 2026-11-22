@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruff>=0.5", "pytest-rerunfailures>=2.3"]
+dev = ["ruff>=0.5", "pytest-rerunfailures>=2.3", "pytest-xdist>=3.5", "pytest-cov>=4.1"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-markers --alluredir=allure-results"

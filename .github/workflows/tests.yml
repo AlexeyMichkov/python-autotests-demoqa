@@ -37,21 +37,24 @@ jobs:
         run: |
           echo "API_USER=${{ secrets.API_USER }}" >> .env
           echo "API_PASS=${{ secrets.API_PASS }}" >> .env
-          echo "BASE_URL=https://demoqa.com" >> .env
-          echo "BOOKSTORE_URL=https://bookstore.toolsqa.com" >> .env  
-
 
       - name: Run UI tests
-        run: pytest src/tests/ui/ -v --alluredir=allure-results
+        run: pytest src/tests/ui/ -v --cov=src --cov-append --alluredir=allure-results
 
       - name: Run API tests
-        run: pytest src/tests/api/ -v --alluredir=allure-results --reruns 2
+        run: pytest src/tests/api/ -v --cov=src --cov-append --alluredir=allure-results --reruns 2
+
+      - name: Generate coverage report
+        if: always()
+        run: |
+          coverage html
+          coverage report --fail-under=80
 
       - name: Upload allure results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results
-          path: allure-results
-
-
+          name: coverage-and-allure
+          path: |
+            allure-results/
+            htmlcov/
